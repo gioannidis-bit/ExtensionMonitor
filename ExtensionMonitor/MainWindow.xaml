@@ -1,0 +1,181 @@
+﻿<Window x:Class="ExtensionMonitor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="NS1000 Multi-Extension Monitor" 
+        Height="800" Width="1200"
+        MinHeight="600" MinWidth="800"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <Style TargetType="TextBlock" x:Key="HeaderStyle">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="0,0,0,5"/>
+        </Style>
+
+        <Style TargetType="TextBlock" x:Key="ValueStyle">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
+
+        <Style TargetType="Button" x:Key="ActionButtonStyle">
+            <Setter Property="Padding" Value="15,8"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+        <Style TargetType="DataGridCell" x:Key="StatusCellStyle">
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
+            <TextBlock Text="NS1000 Multi-Extension Monitor" FontSize="18" FontWeight="Bold" VerticalAlignment="Center"/>
+            <Rectangle Width="2" Fill="LightGray" Margin="15,0"/>
+            <TextBlock Text="Real-time PBX Monitoring Dashboard" FontSize="14" VerticalAlignment="Center" Foreground="DarkBlue"/>
+        </StackPanel>
+
+        <!-- Connection Status Panel -->
+        <Border Grid.Row="1" BorderBrush="LightGray" BorderThickness="1" CornerRadius="5" Padding="15" Margin="0,0,0,15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Connection Status" Style="{StaticResource HeaderStyle}"/>
+                    <TextBlock Text="{Binding ConnectionStatus}" Style="{StaticResource ValueStyle}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1">
+                    <TextBlock Text="Last Update" Style="{StaticResource HeaderStyle}"/>
+                    <TextBlock Text="{Binding LastEventTime}" Style="{StaticResource ValueStyle}"/>
+                </StackPanel>
+
+                <!-- Control Buttons -->
+                <StackPanel Grid.Column="2" VerticalAlignment="Center" Orientation="Horizontal">
+                    <Button Name="ConnectButton" Content="Connect" Style="{StaticResource ActionButtonStyle}" 
+                            Click="ConnectButton_Click" Background="LightGreen"/>
+                    <Button Name="DisconnectButton" Content="Disconnect" Style="{StaticResource ActionButtonStyle}" 
+                            Click="DisconnectButton_Click" Background="LightCoral"/>
+                    <Button Name="RefreshButton" Content="Refresh" Style="{StaticResource ActionButtonStyle}" 
+                            Click="RefreshExtensions_Click" Background="LightBlue"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Extensions Grid -->
+        <Border Grid.Row="2" BorderBrush="LightGray" BorderThickness="1" CornerRadius="5" Padding="10" Margin="0,0,0,15">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="Active Extensions" Style="{StaticResource HeaderStyle}" Margin="0,0,0,10"/>
+
+                <DataGrid Grid.Row="1" Name="ExtensionsGrid" 
+                          ItemsSource="{Binding Extensions}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          GridLinesVisibility="Horizontal"
+                          HeadersVisibility="Column"
+                          AlternatingRowBackground="LightGray"
+                          RowHeight="35">
+
+                    <DataGrid.Columns>
+                        <!-- Status Indicator -->
+                        <DataGridTemplateColumn Header="●" Width="40">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Ellipse Width="16" Height="16" Fill="{Binding StatusColor}" 
+                                             HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- Extension Number -->
+                        <DataGridTextColumn Header="Extension" Binding="{Binding ExtensionNumber}" 
+                                            Width="100" FontWeight="Bold"/>
+
+                        <!-- Status -->
+                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" 
+                                            Width="120" CellStyle="{StaticResource StatusCellStyle}"/>
+
+                        <!-- Current Call -->
+                        <DataGridTextColumn Header="Current Call" Binding="{Binding CurrentCall}" 
+                                            Width="200"/>
+
+                        <!-- Caller ID -->
+                        <DataGridTextColumn Header="Caller ID" Binding="{Binding CallerId}" 
+                                            Width="120" FontFamily="Consolas"/>
+
+                        <!-- Called Number -->
+                        <DataGridTextColumn Header="Called Number" Binding="{Binding CalledNumber}" 
+                                            Width="120" FontFamily="Consolas"/>
+
+                        <!-- Call Count -->
+                        <DataGridTextColumn Header="Calls" Binding="{Binding CallCount}" 
+                                            Width="70" CellStyle="{StaticResource StatusCellStyle}"/>
+
+                        <!-- Last Activity -->
+                        <DataGridTextColumn Header="Last Activity" Binding="{Binding LastActivityString}" 
+                                            Width="100" FontFamily="Consolas"/>
+
+                        <!-- Monitored Status -->
+                        <DataGridTemplateColumn Header="Monitored" Width="80">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox IsChecked="{Binding IsMonitored}" IsEnabled="False" 
+                                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+
+        <!-- Log Header -->
+        <Grid Grid.Row="3" Margin="0,0,0,5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" Text="Event Log" Style="{StaticResource HeaderStyle}"/>
+            <Button Grid.Column="1" Content="Clear Log" Click="ClearLog_Click" 
+                    Padding="8,4" FontSize="10" Background="LightYellow"/>
+        </Grid>
+
+        <!-- Event Log -->
+        <Border Grid.Row="4" BorderBrush="DarkGray" BorderThickness="1" CornerRadius="3">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                <TextBox Name="LogTextBox" 
+                         IsReadOnly="True" 
+                         Background="Black" 
+                         Foreground="LightGreen"
+                         FontFamily="Consolas" 
+                         FontSize="10"
+                         Padding="10"
+                         BorderThickness="0"
+                         TextWrapping="Wrap"
+                         VerticalScrollBarVisibility="Auto"/>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</Window>
