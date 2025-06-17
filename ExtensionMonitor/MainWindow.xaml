@@ -2,8 +2,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="NS1000 Multi-Extension Monitor" 
-        Height="800" Width="1200"
-        MinHeight="600" MinWidth="800"
+        Height="900" Width="1400"
+        MinHeight="700" MinWidth="1000"
         WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
@@ -29,10 +29,21 @@
             <Setter Property="Padding" Value="8,4"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
+
+        <Style TargetType="Border" x:Key="StatCardStyle">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="LightGray"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="Margin" Value="5"/>
+        </Style>
     </Window.Resources>
 
     <Grid Margin="15">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="2*"/>
@@ -42,7 +53,7 @@
 
         <!-- Header -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
-            <TextBlock Text="NS1000 Multi-Extension Monitor" FontSize="18" FontWeight="Bold" VerticalAlignment="Center"/>
+            <TextBlock Text="NS1000 Multi-Extension Monitor" FontSize="20" FontWeight="Bold" VerticalAlignment="Center"/>
             <Rectangle Width="2" Fill="LightGray" Margin="15,0"/>
             <TextBlock Text="Real-time PBX Monitoring Dashboard" FontSize="14" VerticalAlignment="Center" Foreground="DarkBlue"/>
         </StackPanel>
@@ -58,12 +69,25 @@
 
                 <StackPanel Grid.Column="0">
                     <TextBlock Text="Connection Status" Style="{StaticResource HeaderStyle}"/>
-                    <TextBlock Text="{Binding ConnectionStatus}" Style="{StaticResource ValueStyle}"/>
+                    <TextBlock Text="{Binding ConnectionStatus}" Style="{StaticResource ValueStyle}" FontWeight="Bold">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource ValueStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ConnectionStatus}" Value="Connected">
+                                        <Setter Property="Foreground" Value="Green"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ConnectionStatus}" Value="Disconnected">
+                                        <Setter Property="Foreground" Value="Red"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
                 </StackPanel>
 
                 <StackPanel Grid.Column="1">
                     <TextBlock Text="Last Update" Style="{StaticResource HeaderStyle}"/>
-                    <TextBlock Text="{Binding LastEventTime}" Style="{StaticResource ValueStyle}"/>
+                    <TextBlock Text="{Binding LastEventTime}" Style="{StaticResource ValueStyle}" FontFamily="Consolas"/>
                 </StackPanel>
 
                 <!-- Control Buttons -->
@@ -72,38 +96,105 @@
                             Click="ConnectButton_Click" Background="LightGreen"/>
                     <Button Name="DisconnectButton" Content="Disconnect" Style="{StaticResource ActionButtonStyle}" 
                             Click="DisconnectButton_Click" Background="LightCoral"/>
+                    <Button Name="SelectExtensionsButton" Content="Select Extensions" Style="{StaticResource ActionButtonStyle}" 
+                            Click="SelectExtensions_Click" Background="LightSkyBlue"/>
                     <Button Name="RefreshButton" Content="Refresh" Style="{StaticResource ActionButtonStyle}" 
                             Click="RefreshExtensions_Click" Background="LightBlue"/>
+                    <Button Name="ExportButton" Content="Export CSV" Style="{StaticResource ActionButtonStyle}" 
+                            Click="ExportToCSV_Click" Background="LightYellow"/>
                 </StackPanel>
             </Grid>
         </Border>
 
+        <!-- Statistics Panel -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,15">
+            <Border Style="{StaticResource StatCardStyle}">
+                <StackPanel>
+                    <TextBlock Text="Total Extensions" FontSize="12" Foreground="Gray"/>
+                    <TextBlock Text="{Binding Extensions.Count}" FontSize="24" FontWeight="Bold" Foreground="DarkBlue"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource StatCardStyle}">
+                <StackPanel>
+                    <TextBlock Text="Monitored" FontSize="12" Foreground="Gray"/>
+                    <TextBlock Text="{Binding MonitoredExtensionsCount}" FontSize="24" FontWeight="Bold" Foreground="Green"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource StatCardStyle}">
+                <StackPanel>
+                    <TextBlock Text="Active Calls" FontSize="12" Foreground="Gray"/>
+                    <TextBlock Text="{Binding ActiveCallsCount}" FontSize="24" FontWeight="Bold" Foreground="Orange"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource StatCardStyle}">
+                <StackPanel>
+                    <TextBlock Text="Total Calls Today" FontSize="12" Foreground="Gray"/>
+                    <TextBlock Text="{Binding TotalCallsToday}" FontSize="24" FontWeight="Bold" Foreground="Purple"/>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+
+        <!-- Filter Panel -->
+        <Grid Grid.Row="3" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                <TextBlock Text="Filter:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="Bold"/>
+                <TextBox Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}" 
+                         Width="150" Height="25" VerticalAlignment="Center"/>
+            </StackPanel>
+        </Grid>
+
         <!-- Extensions Grid -->
-        <Border Grid.Row="2" BorderBrush="LightGray" BorderThickness="1" CornerRadius="5" Padding="10" Margin="0,0,0,15">
+        <Border Grid.Row="4" BorderBrush="LightGray" BorderThickness="1" CornerRadius="5" Padding="10" Margin="0,0,0,15">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Text="Active Extensions" Style="{StaticResource HeaderStyle}" Margin="0,0,0,10"/>
+                <TextBlock Grid.Row="0" Text="Extensions Monitor" Style="{StaticResource HeaderStyle}" Margin="0,0,0,10"/>
 
                 <DataGrid Grid.Row="1" Name="ExtensionsGrid" 
-                          ItemsSource="{Binding Extensions}"
                           AutoGenerateColumns="False"
                           IsReadOnly="True"
                           GridLinesVisibility="Horizontal"
                           HeadersVisibility="Column"
-                          AlternatingRowBackground="LightGray"
-                          RowHeight="35">
+                          AlternatingRowBackground="#F5F5F5"
+                          RowHeight="40"
+                          CanUserResizeColumns="True"
+                          CanUserSortColumns="True">
+
+                    <DataGrid.Resources>
+                        <Style TargetType="DataGridRow">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Status}" Value="Connected">
+                                    <Setter Property="Background" Value="#E6F3FF"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Status}" Value="Ringing">
+                                    <Setter Property="Background" Value="#FFF3E6"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.Resources>
 
                     <DataGrid.Columns>
                         <!-- Status Indicator -->
                         <DataGridTemplateColumn Header="●" Width="40">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <Ellipse Width="16" Height="16" Fill="{Binding StatusColor}" 
-                                             HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <Ellipse Width="18" Height="18" Fill="{Binding StatusColor}" 
+                                             HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Ellipse.ToolTip>
+                                            <TextBlock Text="{Binding Status}"/>
+                                        </Ellipse.ToolTip>
+                                    </Ellipse>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
@@ -112,13 +203,17 @@
                         <DataGridTextColumn Header="Extension" Binding="{Binding ExtensionNumber}" 
                                             Width="100" FontWeight="Bold"/>
 
+                        <!-- Line Name -->
+                        <DataGridTextColumn Header="Line Name" Binding="{Binding LineName}" 
+                                            Width="150"/>
+
                         <!-- Status -->
                         <DataGridTextColumn Header="Status" Binding="{Binding Status}" 
-                                            Width="120" CellStyle="{StaticResource StatusCellStyle}"/>
+                                            Width="100"/>
 
                         <!-- Current Call -->
                         <DataGridTextColumn Header="Current Call" Binding="{Binding CurrentCall}" 
-                                            Width="200"/>
+                                            Width="180"/>
 
                         <!-- Caller ID -->
                         <DataGridTextColumn Header="Caller ID" Binding="{Binding CallerId}" 
@@ -130,18 +225,32 @@
 
                         <!-- Call Count -->
                         <DataGridTextColumn Header="Calls" Binding="{Binding CallCount}" 
-                                            Width="70" CellStyle="{StaticResource StatusCellStyle}"/>
+                                            Width="60"/>
 
                         <!-- Last Activity -->
                         <DataGridTextColumn Header="Last Activity" Binding="{Binding LastActivityString}" 
                                             Width="100" FontFamily="Consolas"/>
 
-                        <!-- Monitored Status -->
-                        <DataGridTemplateColumn Header="Monitored" Width="80">
+                        <!-- Monitor Control -->
+                        <DataGridTemplateColumn Header="Monitor" Width="100">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <CheckBox IsChecked="{Binding IsMonitored}" IsEnabled="False" 
-                                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <Button Click="MonitorExtension_Click" 
+                                            Padding="5,2" 
+                                            HorizontalAlignment="Center">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="Content" Value="Monitor"/>
+                                                <Setter Property="Background" Value="LightGreen"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsMonitored}" Value="True">
+                                                        <Setter Property="Content" Value="Stop"/>
+                                                        <Setter Property="Background" Value="LightCoral"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
@@ -151,7 +260,7 @@
         </Border>
 
         <!-- Log Header -->
-        <Grid Grid.Row="3" Margin="0,0,0,5">
+        <Grid Grid.Row="5" Margin="0,0,0,5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -163,14 +272,14 @@
         </Grid>
 
         <!-- Event Log -->
-        <Border Grid.Row="4" BorderBrush="DarkGray" BorderThickness="1" CornerRadius="3">
+        <Border Grid.Row="6" BorderBrush="DarkGray" BorderThickness="1" CornerRadius="3">
             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                 <TextBox Name="LogTextBox" 
                          IsReadOnly="True" 
-                         Background="Black" 
-                         Foreground="LightGreen"
+                         Background="#1E1E1E" 
+                         Foreground="#00FF00"
                          FontFamily="Consolas" 
-                         FontSize="10"
+                         FontSize="11"
                          Padding="10"
                          BorderThickness="0"
                          TextWrapping="Wrap"

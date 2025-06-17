@@ -1,0 +1,80 @@
+﻿<Window x:Class="ExtensionMonitor.ExtensionSelectorDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Select Extensions to Monitor" 
+        Height="600" Width="800"
+        WindowStartupLocation="CenterScreen"
+        ShowInTaskbar="False">
+
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <TextBlock Grid.Row="0" Text="Select Extensions to Monitor" 
+                   FontSize="18" FontWeight="Bold" Margin="0,0,0,15"/>
+
+        <!-- Quick Actions -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,10">
+            <Button Content="Select All" Click="SelectAll_Click" 
+                    Margin="0,0,10,0" Padding="10,5"/>
+            <Button Content="Deselect All" Click="DeselectAll_Click" 
+                    Margin="0,0,10,0" Padding="10,5"/>
+            <Button Content="Select Range" Click="SelectRange_Click" 
+                    Margin="0,0,10,0" Padding="10,5"/>
+            <TextBlock Text="Filter:" VerticalAlignment="Center" 
+                       Margin="20,0,5,0"/>
+            <TextBox Name="FilterTextBox" Width="200" 
+                     TextChanged="FilterTextBox_TextChanged"/>
+        </StackPanel>
+
+        <!-- Extensions List -->
+        <Border Grid.Row="2" BorderBrush="LightGray" BorderThickness="1" 
+                CornerRadius="5" Padding="10" Margin="0,0,0,15">
+            <DataGrid Name="ExtensionsGrid" 
+                      AutoGenerateColumns="False"
+                      CanUserResizeColumns="True"
+                      GridLinesVisibility="Horizontal"
+                      HeadersVisibility="Column">
+                <DataGrid.Columns>
+                    <!-- Monitor Checkbox -->
+                    <DataGridCheckBoxColumn Header="Monitor" 
+                                            Binding="{Binding Monitor}" 
+                                            Width="60"/>
+
+                    <!-- Extension Number -->
+                    <DataGridTextColumn Header="Extension" 
+                                        Binding="{Binding ExtensionNumber}" 
+                                        Width="100" 
+                                        IsReadOnly="True"/>
+
+                    <!-- Line Name -->
+                    <DataGridTextColumn Header="Line Name" 
+                                        Binding="{Binding LineName}" 
+                                        Width="*" 
+                                        IsReadOnly="True"/>
+
+                    <!-- Current Status -->
+                    <DataGridTextColumn Header="Current Status" 
+                                        Binding="{Binding Status}" 
+                                        Width="120" 
+                                        IsReadOnly="True"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <!-- Buttons -->
+        <StackPanel Grid.Row="3" Orientation="Horizontal" 
+                    HorizontalAlignment="Right">
+            <Button Content="OK" Click="OK_Click" 
+                    Width="100" Margin="0,0,10,0" 
+                    Padding="5" IsDefault="True"/>
+            <Button Content="Cancel" Click="Cancel_Click" 
+                    Width="100" Padding="5" IsCancel="True"/>
+        </StackPanel>
+    </Grid>
+</Window>
