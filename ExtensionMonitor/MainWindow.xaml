@@ -69,7 +69,7 @@
 
                 <StackPanel Grid.Column="0">
                     <TextBlock Text="Connection Status" Style="{StaticResource HeaderStyle}"/>
-                    <TextBlock Text="{Binding ConnectionStatus}" Style="{StaticResource ValueStyle}" FontWeight="Bold">
+                    <TextBlock Text="{Binding ConnectionStatus}" FontWeight="Bold">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock" BasedOn="{StaticResource ValueStyle}">
                                 <Style.Triggers>
